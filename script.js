@@ -17,14 +17,14 @@ function showLogin() {
 }
 
 // Verifica si hay una sesión iniciada
-window.onload = () => {
-    if (loggedUser) {
-        userDisplay.textContent = loggedUser;
-        loginSection.style.display = 'none';
-        noteSection.style.display = 'block';
-    }
-    renderNotes();
-};
+  window.onload = () => {
+      if (loggedUser) {
+          userDisplay.textContent = loggedUser;
+          loginSection.style.display = 'none';
+          noteSection.style.display = 'block';
+          renderNotes();
+      }
+  };
 
 // Registrar usuario
 async function register() {
@@ -59,16 +59,17 @@ async function login() {
     fd.append('username', username);
     fd.append('password', password);
 
-    const res = await fetch('login.php', { method: 'POST', body: fd });
-    const data = await res.json();
-    if (data.success) {
-        userDisplay.textContent = data.username;
-        loginSection.style.display = 'none';
-        noteSection.style.display = 'block';
-    } else {
-        alert('❌ ' + data.message);
-    }
-}
+      const res = await fetch('login.php', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (data.success) {
+          userDisplay.textContent = data.username;
+          loginSection.style.display = 'none';
+          noteSection.style.display = 'block';
+          renderNotes();
+      } else {
+          alert('❌ ' + data.message);
+      }
+  }
 
 // Logout
 async function logout() {

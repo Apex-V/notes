@@ -23,10 +23,3 @@ CREATE TABLE notes (
 );
 
 INSERT INTO roles (name) VALUES ('administrador'), ('recepcionista');
-
--- admin / admin123
--- recepcionista / recep456
-
-INSERT INTO users (username, password, role_id) VALUES
-('admin', '$2y$10$3RxdJGzLQpD5L1gFqFh4sODKgLx1ZzVHZPzzlxlm94dxcdPwlViZK', 1),
-('recepcionista', '$2y$10$79pER4zLnh86Z1hhrcOe4e9DHDzOm3EsVoLZqZr6eQFeyyMNMYAiq', 2);

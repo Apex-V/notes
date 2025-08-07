@@ -18,9 +18,9 @@ if ($stmt->fetch()) {
     exit;
 }
 
-$hash = password_hash($password, PASSWORD_BCRYPT);
-$stmt = $pdo->prepare('INSERT INTO users (username, password) VALUES (?, ?)');
-$stmt->execute([$username, $hash]);
+ $hash = password_hash($password, PASSWORD_BCRYPT);
+ $stmt = $pdo->prepare('INSERT INTO users (username, password, role_id) VALUES (?, ?, 2)');
+ $stmt->execute([$username, $hash]);
 
 echo json_encode(['success' => true]);
 ?>
