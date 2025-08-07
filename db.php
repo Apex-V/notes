@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$db   = 'notes_app';
+$db   = 'notes';
 $user = 'root';
 $pass = '';
 $charset = 'utf8mb4';
