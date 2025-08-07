@@ -74,11 +74,11 @@ button:hover {
 }
 
 .note.pending {
-    background-color: #fff9c4;
+    background-color: #fffde7; /* light pastel yellow */
 }
 
 .note.completed {
-    background-color: #dcedc8;
+    background-color: #e8f5e9; /* light pastel green */
 }
 
 .note select {
