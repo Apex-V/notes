@@ -63,23 +63,40 @@ button:hover {
     background-color: #0056b3;
 }
 
-/* Note display */
+/* Contenedor base de la nota */
 .note {
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-top: 10px;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    word-wrap: break-word;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    border: 1px solid #eee;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+    transition: background-color .25s ease;
 }
 
+/* Meta info de la nota */
+.note .note-meta {
+    font-size: 12px;
+    opacity: .8;
+    margin-bottom: 6px;
+}
+
+/* Colores por estatus */
 .note.pending {
-    background-color: #fff9c4;
+    background-color: #fffde7;
+    /* amarillo pastel claro */
 }
 
 .note.completed {
-    background-color: #dcedc8;
+    background-color: #e8f5e9;
+    /* verde pastel claro */
 }
+
+/* (Opcional) si hay CSS que sobreescribe el fondo,
+   descomenta estas líneas para forzar el color: */
+/*
+.note.pending { background-color: #fffde7 !important; }
+.note.completed { background-color: #e8f5e9 !important; }
+*/
 
 .note select {
     margin-top: 8px;
