@@ -107,14 +107,35 @@ async function renderNotes() {
 
     notes.forEach(note => {
         const noteDiv = document.createElement('div');
-        noteDiv.className = 'note';
+        noteDiv.className = 'note ' + (note.status === 'Completed' ? 'completed' : 'pending');
+
+        const updatedInfo = note.updated_by ? `<div class="note-meta">🔄 ${note.updated_by} | 🕒 ${note.updated_at}</div>` : '';
 
         noteDiv.innerHTML = `
       <div class="note-meta">👤 ${note.username} | 🕒 ${note.created_at}</div>
       <div>${note.content}</div>
+      <div class="note-meta">Estado: ${note.status}</div>
+      <select onchange="changeStatus(${note.id}, this.value)">
+        <option value="Pending" ${note.status === 'Pending' ? 'selected' : ''}>Pending</option>
+        <option value="Completed" ${note.status === 'Completed' ? 'selected' : ''}>Completed</option>
+      </select>
+      ${updatedInfo}
     `;
 
         notesList.appendChild(noteDiv);
     });
+}
+
+async function changeStatus(id, status) {
+    const fd = new FormData();
+    fd.append('id', id);
+    fd.append('status', status);
+    const res = await fetch('update_status.php', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        renderNotes();
+    } else {
+        alert('⚠️ ' + data.message);
+    }
 }
 

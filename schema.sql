@@ -19,7 +19,11 @@ CREATE TABLE notes (
   user_id INT NOT NULL,
   content TEXT NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
+  status ENUM('Pending','Completed') DEFAULT 'Pending',
+  updated_by INT DEFAULT NULL,
+  updated_at DATETIME DEFAULT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (updated_by) REFERENCES users(id)
 );
 
 INSERT INTO roles (name) VALUES ('administrador'), ('recepcionista');
