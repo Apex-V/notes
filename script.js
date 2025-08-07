@@ -16,11 +16,10 @@ function showLogin() {
     loginSection.style.display = 'block';
 }
 
-// Verifica si ya hay una sesión iniciada
+// Verifica si hay una sesión iniciada
 window.onload = () => {
-    const user = localStorage.getItem('loggedUser');
-    if (user) {
-        userDisplay.textContent = user;
+    if (loggedUser) {
+        userDisplay.textContent = loggedUser;
         loginSection.style.display = 'none';
         noteSection.style.display = 'block';
     }
@@ -28,7 +27,7 @@ window.onload = () => {
 };
 
 // Registrar usuario
-function register() {
+async function register() {
     const username = document.getElementById('registerUsername').value.trim();
     const password = document.getElementById('registerPassword').value;
 
@@ -37,78 +36,84 @@ function register() {
         return;
     }
 
-    const users = JSON.parse(localStorage.getItem('users')) || {};
-    if (users[username]) {
-        alert('⚠️ Usuario ya existe');
-        return;
-    }
+    const fd = new FormData();
+    fd.append('username', username);
+    fd.append('password', password);
 
-    users[username] = password;
-    localStorage.setItem('users', JSON.stringify(users));
-    alert('✅ Registrado con éxito. Ahora inicia sesión');
-    showLogin();
+    const res = await fetch('register.php', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        alert('✅ Registrado con éxito. Ahora inicia sesión');
+        showLogin();
+    } else {
+        alert('⚠️ ' + data.message);
+    }
 }
 
 // Login
-function login() {
+async function login() {
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value;
 
-    const users = JSON.parse(localStorage.getItem('users')) || {};
-    if (users[username] && users[username] === password) {
-        localStorage.setItem('loggedUser', username);
-        userDisplay.textContent = username;
+    const fd = new FormData();
+    fd.append('username', username);
+    fd.append('password', password);
+
+    const res = await fetch('login.php', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        userDisplay.textContent = data.username;
         loginSection.style.display = 'none';
         noteSection.style.display = 'block';
     } else {
-        alert('❌ Usuario o contraseña incorrectos');
+        alert('❌ ' + data.message);
     }
 }
 
 // Logout
-function logout() {
-    localStorage.removeItem('loggedUser');
+async function logout() {
+    await fetch('logout.php');
     location.reload();
 }
 
 // Agregar nota
-function addNote() {
+async function addNote() {
     const content = noteInput.value.trim();
-    const user = localStorage.getItem('loggedUser');
 
     if (!content) {
         alert('⚠️ Escribe algo para publicar');
         return;
     }
 
-    const newNote = {
-        contenido: content,
-        usuario: user,
-        fecha: new Date().toLocaleString()
-    };
+    const fd = new FormData();
+    fd.append('content', content);
 
-    const notes = JSON.parse(localStorage.getItem('notes')) || [];
-    notes.push(newNote);
-    localStorage.setItem('notes', JSON.stringify(notes));
-
-    noteInput.value = '';
-    renderNotes();
+    const res = await fetch('add_note.php', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+        noteInput.value = '';
+        renderNotes();
+    } else {
+        alert('⚠️ ' + data.message);
+    }
 }
 
 // Mostrar todas las notas
-function renderNotes() {
-    const notes = JSON.parse(localStorage.getItem('notes')) || [];
+async function renderNotes() {
+    const res = await fetch('fetch_notes.php');
+    const notes = await res.json();
     notesList.innerHTML = '';
 
-    notes.reverse().forEach(note => {
+    notes.forEach(note => {
         const noteDiv = document.createElement('div');
         noteDiv.className = 'note';
 
         noteDiv.innerHTML = `
-      <div class="note-meta">👤 ${note.usuario} | 🕒 ${note.fecha}</div>
-      <div>${note.contenido}</div>
+      <div class="note-meta">👤 ${note.username} | 🕒 ${note.created_at}</div>
+      <div>${note.content}</div>
     `;
 
         notesList.appendChild(noteDiv);
     });
 }
+

@@ -1,3 +1,7 @@
+<?php
+session_start();
+$loggedUser = $_SESSION['username'] ?? null;
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -12,7 +16,7 @@
     <div class="container">
         <h1>📝 Notas Compartidas</h1>
 
-        <div id="loginSection">
+        <div id="loginSection" <?php if ($loggedUser) echo 'style="display:none;"'; ?>>
             <input type="text" id="loginUsername" placeholder="Usuario" />
             <input type="password" id="loginPassword" placeholder="Contraseña" />
             <button onclick="login()">🔐 Iniciar sesión</button>
@@ -26,8 +30,8 @@
             <p>¿Ya tienes cuenta? <a href="#" onclick="showLogin()">Inicia sesión</a></p>
         </div>
 
-        <div id="noteSection" style="display: none;">
-            <p>👤 Sesión iniciada como <span id="userDisplay"></span> <button onclick="logout()">Salir</button></p>
+        <div id="noteSection" <?php if (!$loggedUser) echo 'style="display:none;"'; ?>>
+            <p>👤 Sesión iniciada como <span id="userDisplay"><?php echo htmlspecialchars($loggedUser ?? '', ENT_QUOTES, 'UTF-8'); ?></span> <button onclick="logout()">Salir</button></p>
             <textarea id="noteInput" placeholder="Escribe una nota..."></textarea>
             <button onclick="addNote()">📝 Publicar Nota</button>
         </div>
@@ -36,6 +40,9 @@
         <div id="notesList"></div>
     </div>
 
+    <script>
+        const loggedUser = <?php echo $loggedUser ? json_encode($loggedUser) : 'null'; ?>;
+    </script>
     <script src="script.js"></script>
 </body>
 
