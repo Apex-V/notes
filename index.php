@@ -1,5 +1,24 @@
 <?php
 session_start();
+require 'db.php';
+
+// Ensure default users exist with hashed passwords
+$defaults = [
+    ['admin', 'admin123', 1],
+    ['recepcionista', 'recep456', 2]
+];
+
+foreach ($defaults as $user) {
+    [$name, $pass, $role] = $user;
+    $stmt = $pdo->prepare('SELECT id FROM users WHERE username = ?');
+    $stmt->execute([$name]);
+    if (!$stmt->fetch()) {
+        $hash = password_hash($pass, PASSWORD_BCRYPT);
+        $ins = $pdo->prepare('INSERT INTO users (username, password, role_id) VALUES (?, ?, ?)');
+        $ins->execute([$name, $hash, $role]);
+    }
+}
+
 $loggedUser = $_SESSION['username'] ?? null;
 ?>
 <!DOCTYPE html>
