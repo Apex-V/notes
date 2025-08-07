@@ -14,7 +14,7 @@ if ($content === '') {
     exit;
 }
 
-$stmt = $pdo->prepare('INSERT INTO notes (user_id, content) VALUES (?, ?)');
+$stmt = $pdo->prepare('INSERT INTO notes (user_id, content, status) VALUES (?, ?, "Pending")');
 $stmt->execute([$_SESSION['user_id'], $content]);
 
 echo json_encode(['success' => true]);
