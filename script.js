@@ -3,7 +3,20 @@ const registerSection = document.getElementById('registerSection');
 const noteSection = document.getElementById('noteSection');
 const notesList = document.getElementById('notesList');
 const noteInput = document.getElementById('noteInput');
+const addNoteBtn = document.getElementById('addNoteBtn');
+const manageUsersLink = document.getElementById('manageUsersLink');
 const userDisplay = document.getElementById('userDisplay');
+
+let currentRole = typeof loggedRole !== 'undefined' ? loggedRole : null;
+
+function escapeHtml(s) {
+    return String(s ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+}
 
 // Mostrar u ocultar secciones
 function showRegister() {
@@ -18,13 +31,27 @@ function showLogin() {
 
 // Verifica si hay una sesión iniciada
 window.onload = () => {
-    if (loggedUser) {
+    if (typeof loggedUser !== 'undefined' && loggedUser &&
+        loginSection && noteSection && userDisplay) {
         userDisplay.textContent = loggedUser;
         loginSection.style.display = 'none';
         noteSection.style.display = 'block';
+        applyRolePermissions();
         renderNotes();
     }
 };
+
+function applyRolePermissions() {
+    if (currentRole === 1) {
+        if (noteInput) noteInput.style.display = 'block';
+        if (addNoteBtn) addNoteBtn.style.display = 'inline-block';
+        if (manageUsersLink) manageUsersLink.style.display = 'inline';
+    } else {
+        if (noteInput) noteInput.style.display = 'none';
+        if (addNoteBtn) addNoteBtn.style.display = 'none';
+        if (manageUsersLink) manageUsersLink.style.display = 'none';
+    }
+}
 
 // Registrar usuario
 async function register() {
@@ -63,8 +90,10 @@ async function login() {
     const data = await res.json();
     if (data.success) {
         userDisplay.textContent = data.username;
+        currentRole = data.role;
         loginSection.style.display = 'none';
         noteSection.style.display = 'block';
+        applyRolePermissions();
         renderNotes();
     } else {
         alert('❌ ' + data.message);
@@ -116,53 +145,42 @@ async function renderNotes() {
         noteDiv.classList.add(statusClass);
 
         const updatedInfo = note.updated_by
-            ? `<div class="note-meta">🔄 ${note.updated_by} | 🕒 ${note.updated_at}</div>`
+            ? `<div class="note-meta">🔄 ${escapeHtml(note.updated_by)} | 🕒 ${note.updated_at}</div>`
+            : '';
+
+        const statusSelect = currentRole === 1
+            ? `<select data-note-id="${note.id}">
+                <option value="Pending" ${note.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                <option value="Completed" ${note.status === 'Completed' ? 'selected' : ''}>Completed</option>
+              </select>`
             : '';
 
         // Genera el HTML
         noteDiv.innerHTML = `
-      <div class="note-meta">👤 ${note.username} | 🕒 ${note.created_at}</div>
-      <div>${note.content}</div>
+      <div class="note-meta">👤 ${escapeHtml(note.username)} | 🕒 ${note.created_at}</div>
+      <div>${escapeHtml(note.content)}</div>
       <div class="note-meta">Estado: <strong>${note.status}</strong></div>
-      <select data-note-id="${note.id}">
-        <option value="Pending" ${note.status === 'Pending' ? 'selected' : ''}>Pending</option>
-        <option value="Completed" ${note.status === 'Completed' ? 'selected' : ''}>Completed</option>
-      </select>
+      ${statusSelect}
       ${updatedInfo}
     `;
 
-        // Maneja el cambio de estatus SIN tener que re-renderizar todo
-        const selectEl = noteDiv.querySelector('select');
-        selectEl.addEventListener('change', async (e) => {
-            const newStatus = e.target.value;
-            // Actualiza en el backend
-            await changeStatus(note.id, newStatus);
+        if (currentRole === 1) {
+            const selectEl = noteDiv.querySelector('select');
+            selectEl.addEventListener('change', async (e) => {
+                const newStatus = e.target.value;
+                await changeStatus(note.id, newStatus);
 
-            // Actualiza clases visuales según el nuevo estatus
-            noteDiv.classList.remove('pending', 'completed');
-            const newClass = newStatus.toLowerCase() === 'completed' ? 'completed' : 'pending';
-            noteDiv.classList.add(newClass);
+                noteDiv.classList.remove('pending', 'completed');
+                const newClass = newStatus.toLowerCase() === 'completed' ? 'completed' : 'pending';
+                noteDiv.classList.add(newClass);
 
-            // (Opcional) Actualiza el texto "Estado: ..."
-            const metaEstado = noteDiv.querySelector('.note-meta:nth-of-type(2)');
-            if (metaEstado) metaEstado.innerHTML = `Estado: <strong>${newStatus}</strong>`;
-        });
+                const metaEstado = noteDiv.querySelector('.note-meta:nth-of-type(2)');
+                if (metaEstado) metaEstado.innerHTML = `Estado: <strong>${newStatus}</strong>`;
+            });
+        }
 
         notesList.appendChild(noteDiv);
     });
-}
-
-/* Ejemplo de changeStatus: ajusta a tu endpoint */
-async function changeStatus(id, status) {
-    // Devuelve promesa para poder await en el listener
-    const res = await fetch('update_status.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ id, status })
-    });
-    if (!res.ok) {
-        console.error('No se pudo actualizar el estatus');
-    }
 }
 
 async function changeStatus(id, status) {
@@ -232,15 +250,6 @@ async function changeStatus(id, status) {
         </td>
       </tr>
     `).join('');
-    }
-
-    function escapeHtml(s) {
-        return String(s ?? '')
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#39;');
     }
 
     async function loadUsers(page = 1) {
