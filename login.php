@@ -11,16 +11,18 @@ if ($username === '' || $password === '') {
     exit;
 }
 
-$stmt = $pdo->prepare('SELECT id, password FROM users WHERE username = ?');
+$stmt = $pdo->prepare('SELECT id, password, role_id FROM users WHERE username = ?');
 $stmt->execute([$username]);
 $user = $stmt->fetch();
 
 if ($user && password_verify($password, $user['password'])) {
-    $_SESSION['user_id'] = $user['id'];
+    session_regenerate_id(true);
+    $_SESSION['user_id'] = (int)$user['id'];
     $_SESSION['username'] = $username;
-    echo json_encode(['success' => true, 'username' => $username]);
+    $_SESSION['role_id'] = (int)$user['role_id'];
+    echo json_encode(['success' => true, 'username' => $username, 'role_id' => (int)$user['role_id']]);
+    exit;
 } else {
     echo json_encode(['success' => false, 'message' => 'Credenciales incorrectas']);
 }
-?>
 

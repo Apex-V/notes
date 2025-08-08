@@ -1,7 +1,7 @@
 /* General */
 body {
     font-family: 'Segoe UI', sans-serif;
-    background-color: #f0f2f5;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
     margin: 0;
     padding: 20px;
     display: flex;
@@ -82,12 +82,12 @@ button:hover {
 
 /* Colores por estatus */
 .note.pending {
-    background-color: #fffde7;
+    background-color: #fff7a1;
     /* amarillo pastel claro */
 }
 
 .note.completed {
-    background-color: #e8f5e9;
+    background-color: #8afa93;
     /* verde pastel claro */
 }
 
@@ -160,18 +160,17 @@ a:hover {
 /* ======= USERS PANEL (append to style.css) ======= */
 
 :root {
-    --users-bg: #0f172a;
-    /* fondo oscuro (combínalo con tu sitio) */
-    --users-card: #111827;
-    --users-border: #1f2937;
-    --users-text: #e5e7eb;
-    --users-muted: #9ca3af;
+    --users-bg: #f9fafb;
+    --users-card: #ffffff;
+    --users-border: #d1d5db;
+    --users-text: #1f2937;
+    --users-muted: #6b7280;
     --users-primary: #3b82f6;
     --users-danger: #ef4444;
     --users-ok: #10b981;
 }
 
-body {
+.users-page {
     background: var(--users-bg);
     color: var(--users-text);
 }
@@ -239,7 +238,7 @@ body {
     padding: 10px 12px;
     border-radius: 8px;
     border: 1px solid var(--users-border);
-    background: #0b1220;
+    background: var(--users-card);
     color: var(--users-text);
 }
 
@@ -258,14 +257,14 @@ body {
 .users-btn {
     padding: 8px 12px;
     border: 1px solid var(--users-border);
-    background: #0b1220;
+    background: var(--users-card);
     color: var(--users-text);
     border-radius: 8px;
     cursor: pointer;
 }
 
 .users-btn:hover {
-    border-color: #334155;
+    border-color: var(--users-primary);
 }
 
 .users-btn.primary {
@@ -326,7 +325,7 @@ body {
     padding: 8px 12px;
     border-radius: 8px;
     border: 1px solid var(--users-border);
-    background: #0b1220;
+    background: var(--users-card);
     color: var(--users-text);
     min-width: 220px;
 }
@@ -351,13 +350,17 @@ body {
 }
 
 .users-table th {
-    background: #0c1425;
+    background: #f3f4f6;
     font-weight: 700;
 }
 
 .users-table td.empty {
     text-align: center;
     color: var(--users-muted);
+}
+
+.users-table tr:nth-child(even) {
+    background: #f9fafb;
 }
 
 .col-actions {

@@ -29,7 +29,7 @@ if (!$me || (int)$me['role_id'] !== 1) {
     <link href="style.css" rel="stylesheet">
 </head>
 
-<body>
+<body class="users-page">
     <div class="users-container" id="usersApp">
         <header class="users-header">
             <h1>Administrar Usuarios</h1>

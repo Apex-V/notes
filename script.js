@@ -3,7 +3,20 @@ const registerSection = document.getElementById('registerSection');
 const noteSection = document.getElementById('noteSection');
 const notesList = document.getElementById('notesList');
 const noteInput = document.getElementById('noteInput');
+const addNoteBtn = document.getElementById('addNoteBtn');
+const manageUsersLink = document.getElementById('manageUsersLink');
 const userDisplay = document.getElementById('userDisplay');
+
+let currentRole = typeof loggedRole !== 'undefined' ? loggedRole : null;
+
+function escapeHtml(s) {
+    return String(s ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+}
 
 // Mostrar u ocultar secciones
 function showRegister() {
@@ -18,13 +31,30 @@ function showLogin() {
 
 // Verifica si hay una sesión iniciada
 window.onload = () => {
-    if (loggedUser) {
+    if (typeof loggedUser !== 'undefined' && loggedUser &&
+        loginSection && noteSection && userDisplay) {
         userDisplay.textContent = loggedUser;
         loginSection.style.display = 'none';
         noteSection.style.display = 'block';
+        applyRolePermissions();
         renderNotes();
     }
 };
+
+// Reemplaza tu applyRolePermissions() por esta versión
+function canPost() {
+    return currentRole === 1 || currentRole === 2; // admin y recepcionista
+}
+function canManageUsers() {
+    return currentRole === 1; // solo admin
+}
+
+function applyRolePermissions() {
+    const showPost = canPost();
+    if (noteInput) noteInput.style.display = showPost ? 'block' : 'none';
+    if (addNoteBtn) addNoteBtn.style.display = showPost ? 'inline-block' : 'none';
+    if (manageUsersLink) manageUsersLink.style.display = canManageUsers() ? 'inline' : 'none';
+}
 
 // Registrar usuario
 async function register() {
@@ -59,37 +89,37 @@ async function login() {
     fd.append('username', username);
     fd.append('password', password);
 
-    const res = await fetch('login.php', { method: 'POST', body: fd });
+    const res = await fetch('login.php', { method: 'POST', body: fd, credentials: 'include' });
     const data = await res.json();
     if (data.success) {
         userDisplay.textContent = data.username;
+        currentRole = data.role_id;   // <— usa role_id del backend
         loginSection.style.display = 'none';
         noteSection.style.display = 'block';
+        applyRolePermissions();
         renderNotes();
     } else {
         alert('❌ ' + data.message);
     }
 }
 
+
 // Logout
 async function logout() {
-    await fetch('logout.php');
+    await fetch('logout.php', { credentials: 'include' });
     location.reload();
 }
+
 
 // Agregar nota
 async function addNote() {
     const content = noteInput.value.trim();
-
-    if (!content) {
-        alert('⚠️ Escribe algo para publicar');
-        return;
-    }
+    if (!content) { alert('⚠️ Escribe algo para publicar'); return; }
 
     const fd = new FormData();
     fd.append('content', content);
 
-    const res = await fetch('add_note.php', { method: 'POST', body: fd });
+    const res = await fetch('add_note.php', { method: 'POST', body: fd, credentials: 'include' });
     const data = await res.json();
     if (data.success) {
         noteInput.value = '';
@@ -99,9 +129,10 @@ async function addNote() {
     }
 }
 
+
 // Mostrar todas las notas
 async function renderNotes() {
-    const res = await fetch('fetch_notes.php');
+    const res = await fetch('fetch_notes.php', { credentials: 'include' });
     const notes = await res.json();
     notesList.innerHTML = '';
 
@@ -116,60 +147,49 @@ async function renderNotes() {
         noteDiv.classList.add(statusClass);
 
         const updatedInfo = note.updated_by
-            ? `<div class="note-meta">🔄 ${note.updated_by} | 🕒 ${note.updated_at}</div>`
+            ? `<div class="note-meta">🔄 ${escapeHtml(note.updated_by)} | 🕒 ${note.updated_at}</div>`
+            : '';
+
+        const statusSelect = currentRole === 1
+            ? `<select data-note-id="${note.id}">
+                <option value="Pending" ${note.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                <option value="Completed" ${note.status === 'Completed' ? 'selected' : ''}>Completed</option>
+              </select>`
             : '';
 
         // Genera el HTML
         noteDiv.innerHTML = `
-      <div class="note-meta">👤 ${note.username} | 🕒 ${note.created_at}</div>
-      <div>${note.content}</div>
+      <div class="note-meta">👤 ${escapeHtml(note.username)} | 🕒 ${note.created_at}</div>
+      <div>${escapeHtml(note.content)}</div>
       <div class="note-meta">Estado: <strong>${note.status}</strong></div>
-      <select data-note-id="${note.id}">
-        <option value="Pending" ${note.status === 'Pending' ? 'selected' : ''}>Pending</option>
-        <option value="Completed" ${note.status === 'Completed' ? 'selected' : ''}>Completed</option>
-      </select>
+      ${statusSelect}
       ${updatedInfo}
     `;
 
-        // Maneja el cambio de estatus SIN tener que re-renderizar todo
-        const selectEl = noteDiv.querySelector('select');
-        selectEl.addEventListener('change', async (e) => {
-            const newStatus = e.target.value;
-            // Actualiza en el backend
-            await changeStatus(note.id, newStatus);
+        if (currentRole === 1) {
+            const selectEl = noteDiv.querySelector('select');
+            selectEl.addEventListener('change', async (e) => {
+                const newStatus = e.target.value;
+                await changeStatus(note.id, newStatus);
 
-            // Actualiza clases visuales según el nuevo estatus
-            noteDiv.classList.remove('pending', 'completed');
-            const newClass = newStatus.toLowerCase() === 'completed' ? 'completed' : 'pending';
-            noteDiv.classList.add(newClass);
+                noteDiv.classList.remove('pending', 'completed');
+                const newClass = newStatus.toLowerCase() === 'completed' ? 'completed' : 'pending';
+                noteDiv.classList.add(newClass);
 
-            // (Opcional) Actualiza el texto "Estado: ..."
-            const metaEstado = noteDiv.querySelector('.note-meta:nth-of-type(2)');
-            if (metaEstado) metaEstado.innerHTML = `Estado: <strong>${newStatus}</strong>`;
-        });
+                const metaEstado = noteDiv.querySelector('.note-meta:nth-of-type(2)');
+                if (metaEstado) metaEstado.innerHTML = `Estado: <strong>${newStatus}</strong>`;
+            });
+        }
 
         notesList.appendChild(noteDiv);
     });
-}
-
-/* Ejemplo de changeStatus: ajusta a tu endpoint */
-async function changeStatus(id, status) {
-    // Devuelve promesa para poder await en el listener
-    const res = await fetch('update_status.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ id, status })
-    });
-    if (!res.ok) {
-        console.error('No se pudo actualizar el estatus');
-    }
 }
 
 async function changeStatus(id, status) {
     const fd = new FormData();
     fd.append('id', id);
     fd.append('status', status);
-    const res = await fetch('update_status.php', { method: 'POST', body: fd });
+    const res = await fetch('update_status.php', { method: 'POST', body: fd, credentials: 'include' });
     const data = await res.json();
     if (data.success) {
         renderNotes();
@@ -177,6 +197,7 @@ async function changeStatus(id, status) {
         alert('⚠️ ' + data.message);
     }
 }
+
 
 // ======= USERS PANEL (append to script.js) =======
 (() => {
@@ -232,15 +253,6 @@ async function changeStatus(id, status) {
         </td>
       </tr>
     `).join('');
-    }
-
-    function escapeHtml(s) {
-        return String(s ?? '')
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#39;');
     }
 
     async function loadUsers(page = 1) {
@@ -389,3 +401,4 @@ async function changeStatus(id, status) {
     resetForm();
     loadUsers(1);
 })();
+

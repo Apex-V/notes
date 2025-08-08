@@ -60,7 +60,7 @@ try {
             // GET /users.php           -> lista
             // GET /users.php?id=3      -> detalle
             if ($id) {
-                $stmt = $pdo->prepare("SELECT id, username, role_id, created_at FROM users WHERE id = ?");
+                $stmt = $pdo->prepare("SELECT id, username, role_id FROM users WHERE id = ?");
                 $stmt->execute([$id]);
                 $row = $stmt->fetch();
                 if (!$row) jsonResponse(['success' => false, 'message' => 'Usuario no encontrado'], 404);
@@ -71,7 +71,7 @@ try {
                 $offset = ($page - 1) * $limit;
 
                 $total = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
-                $stmt  = $pdo->prepare("SELECT id, username, role_id, created_at
+                $stmt  = $pdo->prepare("SELECT id, username, role_id
                                         FROM users
                                         ORDER BY id DESC
                                         LIMIT :limit OFFSET :offset");
