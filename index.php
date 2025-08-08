@@ -2,7 +2,7 @@
 session_start();
 require 'db.php';
 
-// Ensure default users exist with hashed passwords
+//Ensure default users exist with hashed passwords
 // $defaults = [
 //     ['admin', 'admin123', 1],
 //     ['recepcionista', 'recep456', 2]
@@ -39,7 +39,7 @@ $loggedUser = $_SESSION['username'] ?? null;
             <input type="text" id="loginUsername" placeholder="Usuario" />
             <input type="password" id="loginPassword" placeholder="Contraseña" />
             <button onclick="login()">🔐 Iniciar sesión</button>
-            <p>¿No tienes cuenta? <a href="#" onclick="showRegister()">Regístrate</a></p>
+            <!-- <p>¿No tienes cuenta? <a href="#" onclick="showRegister()">Regístrate</a></p> -->
         </div>
 
         <div id="registerSection" style="display: none;">

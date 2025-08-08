@@ -156,3 +156,237 @@ a:hover {
         font-size: 12px;
     }
 }
+
+/* ======= USERS PANEL (append to style.css) ======= */
+
+:root {
+    --users-bg: #0f172a;
+    /* fondo oscuro (combínalo con tu sitio) */
+    --users-card: #111827;
+    --users-border: #1f2937;
+    --users-text: #e5e7eb;
+    --users-muted: #9ca3af;
+    --users-primary: #3b82f6;
+    --users-danger: #ef4444;
+    --users-ok: #10b981;
+}
+
+body {
+    background: var(--users-bg);
+    color: var(--users-text);
+}
+
+.users-container {
+    max-width: 1000px;
+    margin: 24px auto;
+    padding: 0 16px;
+}
+
+.users-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.users-header h1 {
+    font-size: 1.6rem;
+    margin: 0;
+}
+
+.users-header-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.users-me {
+    color: var(--users-muted);
+    font-size: 0.95rem;
+}
+
+.users-card {
+    background: var(--users-card);
+    border: 1px solid var(--users-border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.users-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+@media (max-width: 760px) {
+    .users-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.users-field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.users-field input,
+.users-field select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--users-border);
+    background: #0b1220;
+    color: var(--users-text);
+}
+
+.users-field small {
+    color: var(--users-muted);
+    display: block;
+    margin-top: 4px;
+}
+
+.users-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.users-btn {
+    padding: 8px 12px;
+    border: 1px solid var(--users-border);
+    background: #0b1220;
+    color: var(--users-text);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.users-btn:hover {
+    border-color: #334155;
+}
+
+.users-btn.primary {
+    background: var(--users-primary);
+    border-color: transparent;
+    color: white;
+}
+
+.users-btn.primary:hover {
+    filter: brightness(1.05);
+}
+
+.users-btn.danger {
+    background: var(--users-danger);
+    border-color: transparent;
+    color: white;
+}
+
+.users-btn.ghost {
+    background: transparent;
+}
+
+.users-btn.small {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+}
+
+.users-msg {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+}
+
+.users-msg.ok {
+    background: rgba(16, 185, 129, .1);
+    border: 1px solid rgba(16, 185, 129, .4);
+}
+
+.users-msg.err {
+    background: rgba(239, 68, 68, .1);
+    border: 1px solid rgba(239, 68, 68, .4);
+}
+
+.users-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.users-tools {
+    display: flex;
+    gap: 8px;
+}
+
+.users-tools input {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--users-border);
+    background: #0b1220;
+    color: var(--users-text);
+    min-width: 220px;
+}
+
+.users-table-wrap {
+    overflow: auto;
+    border-radius: 10px;
+    border: 1px solid var(--users-border);
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 680px;
+}
+
+.users-table th,
+.users-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--users-border);
+    text-align: left;
+}
+
+.users-table th {
+    background: #0c1425;
+    font-weight: 700;
+}
+
+.users-table td.empty {
+    text-align: center;
+    color: var(--users-muted);
+}
+
+.col-actions {
+    width: 170px;
+    white-space: nowrap;
+}
+
+.users-badge {
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid var(--users-border);
+}
+
+.users-badge.admin {
+    background: rgba(59, 130, 246, .12);
+    border-color: rgba(59, 130, 246, .4);
+}
+
+.users-badge.recep {
+    background: rgba(234, 179, 8, .12);
+    border-color: rgba(234, 179, 8, .4);
+}
+
+.users-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 12px;
+}
