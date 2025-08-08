@@ -82,12 +82,12 @@ button:hover {
 
 /* Colores por estatus */
 .note.pending {
-    background-color: #fffde7;
+    background-color: #fff7a1;
     /* amarillo pastel claro */
 }
 
 .note.completed {
-    background-color: #e8f5e9;
+    background-color: #8afa93;
     /* verde pastel claro */
 }
 

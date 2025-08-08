@@ -8,7 +8,11 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-if (($_SESSION['role_id'] ?? 0) !== 1) {
+// Verificación de rol admin (role_id = 1)
+$me = $pdo->prepare('SELECT role_id FROM users WHERE id = ?');
+$me->execute([$_SESSION['user_id']]);
+if ((int)$me->fetchColumn() !== 1) {
+    http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'No autorizado']);
     exit;
 }
@@ -25,4 +29,3 @@ $stmt = $pdo->prepare('UPDATE notes SET status = ?, updated_by = ?, updated_at =
 $stmt->execute([$status, $_SESSION['user_id'], $noteId]);
 
 echo json_encode(['success' => true]);
-?>

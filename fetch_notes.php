@@ -1,16 +1,21 @@
 <?php
 session_start();
+require 'db.php';
+
+header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'No autenticado']);
     exit;
 }
 
-require 'db.php';
-header('Content-Type: application/json');
+$sql = 'SELECT n.id, n.content, n.status, n.created_at, u.username
+        FROM notes n
+        JOIN users u ON u.id = n.created_by
+        ORDER BY n.id DESC';
+$notes = $pdo->query($sql)->fetchAll();
 
-$stmt = $pdo->query("SELECT notes.id, notes.content, notes.created_at, notes.status, notes.updated_at, u1.username AS username, u2.username AS updated_by FROM notes JOIN users u1 ON notes.user_id = u1.id LEFT JOIN users u2 ON notes.updated_by = u2.id ORDER BY notes.created_at DESC");
-$notes = $stmt->fetchAll();
-
-echo json_encode($notes);
-?>
+echo json_encode(['success' => true, 'notes' => $notes]);

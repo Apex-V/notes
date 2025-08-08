@@ -41,16 +41,19 @@ window.onload = () => {
     }
 };
 
+// Reemplaza tu applyRolePermissions() por esta versión
+function canPost() {
+    return currentRole === 1 || currentRole === 2; // admin y recepcionista
+}
+function canManageUsers() {
+    return currentRole === 1; // solo admin
+}
+
 function applyRolePermissions() {
-    if (currentRole === 1) {
-        if (noteInput) noteInput.style.display = 'block';
-        if (addNoteBtn) addNoteBtn.style.display = 'inline-block';
-        if (manageUsersLink) manageUsersLink.style.display = 'inline';
-    } else {
-        if (noteInput) noteInput.style.display = 'none';
-        if (addNoteBtn) addNoteBtn.style.display = 'none';
-        if (manageUsersLink) manageUsersLink.style.display = 'none';
-    }
+    const showPost = canPost();
+    if (noteInput) noteInput.style.display = showPost ? 'block' : 'none';
+    if (addNoteBtn) addNoteBtn.style.display = showPost ? 'inline-block' : 'none';
+    if (manageUsersLink) manageUsersLink.style.display = canManageUsers() ? 'inline' : 'none';
 }
 
 // Registrar usuario
@@ -86,11 +89,11 @@ async function login() {
     fd.append('username', username);
     fd.append('password', password);
 
-    const res = await fetch('login.php', { method: 'POST', body: fd });
+    const res = await fetch('login.php', { method: 'POST', body: fd, credentials: 'include' });
     const data = await res.json();
     if (data.success) {
         userDisplay.textContent = data.username;
-        currentRole = data.role;
+        currentRole = data.role_id;   // <— usa role_id del backend
         loginSection.style.display = 'none';
         noteSection.style.display = 'block';
         applyRolePermissions();
@@ -100,25 +103,23 @@ async function login() {
     }
 }
 
+
 // Logout
 async function logout() {
-    await fetch('logout.php');
+    await fetch('logout.php', { credentials: 'include' });
     location.reload();
 }
+
 
 // Agregar nota
 async function addNote() {
     const content = noteInput.value.trim();
-
-    if (!content) {
-        alert('⚠️ Escribe algo para publicar');
-        return;
-    }
+    if (!content) { alert('⚠️ Escribe algo para publicar'); return; }
 
     const fd = new FormData();
     fd.append('content', content);
 
-    const res = await fetch('add_note.php', { method: 'POST', body: fd });
+    const res = await fetch('add_note.php', { method: 'POST', body: fd, credentials: 'include' });
     const data = await res.json();
     if (data.success) {
         noteInput.value = '';
@@ -128,9 +129,10 @@ async function addNote() {
     }
 }
 
+
 // Mostrar todas las notas
 async function renderNotes() {
-    const res = await fetch('fetch_notes.php');
+    const res = await fetch('fetch_notes.php', { credentials: 'include' });
     const notes = await res.json();
     notesList.innerHTML = '';
 
@@ -187,7 +189,7 @@ async function changeStatus(id, status) {
     const fd = new FormData();
     fd.append('id', id);
     fd.append('status', status);
-    const res = await fetch('update_status.php', { method: 'POST', body: fd });
+    const res = await fetch('update_status.php', { method: 'POST', body: fd, credentials: 'include' });
     const data = await res.json();
     if (data.success) {
         renderNotes();
@@ -195,6 +197,7 @@ async function changeStatus(id, status) {
         alert('⚠️ ' + data.message);
     }
 }
+
 
 // ======= USERS PANEL (append to script.js) =======
 (() => {
@@ -398,3 +401,4 @@ async function changeStatus(id, status) {
     resetForm();
     loadUsers(1);
 })();
+

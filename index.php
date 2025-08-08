@@ -53,20 +53,23 @@ $loggedRole = $_SESSION['role_id'] ?? null;
         <div id="noteSection" <?php if (!$loggedUser) echo 'style="display:none;"'; ?>>
             <p>👤 Sesión iniciada como <span id="userDisplay"><?php echo htmlspecialchars($loggedUser ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
                 <a id="manageUsersLink" href="admin_users.php" style="display:none;">Gestionar usuarios</a>
-                <button onclick="logout()">Salir</button></p>
+                <button onclick="logout()">Salir</button>
+            </p>
             <textarea id="noteInput" placeholder="Escribe una nota..." style="display:none;"></textarea>
             <button id="addNoteBtn" onclick="addNote()" style="display:none;">📝 Publicar Nota</button>
         </div>
 
-        <h2>📚 Todas las notas</h2>
-        <div id="notesList"></div>
+        <h2 <?= !$loggedUser ? 'style="display:none;"' : '' ?>>📚 Todas las notas</h2>
+        <div id="notesList" <?= !$loggedUser ? 'style="display:none;"' : '' ?>></div>
     </div>
 
     <script>
-        const loggedUser = <?php echo $loggedUser ? json_encode($loggedUser) : 'null'; ?>;
-        const loggedRole = <?php echo $loggedRole ? (int)$loggedRole : 'null'; ?>;
+        const loggedUser = <?php echo json_encode($_SESSION['username'] ?? null); ?>;
+        const loggedRole = <?php echo json_encode($_SESSION['role_id'] ?? null); ?>; // 1=admin, 2=recep
     </script>
-    <script src="script.js"></script>
+    <script src="script.js">
+
+    </script>
 </body>
 
 </html>
