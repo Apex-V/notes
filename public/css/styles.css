@@ -1,0 +1,5 @@
+body { font-family: Arial, sans-serif; }
+.container { width: 80%; margin: auto; }
+.note { padding: 10px; margin: 10px 0; }
+.note.pending { background-color: #fffde7; }
+.note.completed { background-color: #e8f5e9; }
