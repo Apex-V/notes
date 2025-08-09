@@ -102,6 +102,13 @@ button:hover {
     margin-top: 8px;
 }
 
+.note-actions button {
+    width: auto;
+    padding: 4px 8px;
+    margin-top: 8px;
+    margin-right: 4px;
+}
+
 .note-meta {
     font-size: 13px;
     color: #555;

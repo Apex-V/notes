@@ -12,9 +12,16 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$sql = 'SELECT n.id, n.content, n.status, n.created_at, u.username
+$sql = 'SELECT n.id,
+               n.content,
+               n.status,
+               n.created_at,
+               u.username,
+               u2.username AS updated_by,
+               n.updated_at
         FROM notes n
-        JOIN users u ON u.id = n.created_by
+        JOIN users u ON u.id = n.user_id
+        LEFT JOIN users u2 ON u2.id = n.updated_by
         ORDER BY n.id DESC';
 $notes = $pdo->query($sql)->fetchAll();
 
