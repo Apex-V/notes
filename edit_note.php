@@ -1,0 +1,37 @@
+<?php
+session_start();
+require 'db.php';
+header('Content-Type: application/json');
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'message' => 'Método no permitido']);
+    exit;
+}
+
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'No autenticado']);
+    exit;
+}
+
+$me = $pdo->prepare('SELECT role_id FROM users WHERE id = ?');
+$me->execute([$_SESSION['user_id']]);
+if ((int)$me->fetchColumn() !== 1) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'No autorizado']);
+    exit;
+}
+
+$id = intval($_POST['id'] ?? 0);
+$content = trim($_POST['content'] ?? '');
+if (!$id || $content === '') {
+    echo json_encode(['success' => false, 'message' => 'Datos inválidos']);
+    exit;
+}
+
+$stmt = $pdo->prepare('UPDATE notes SET content = ?, updated_by = ?, updated_at = NOW() WHERE id = ?');
+$stmt->execute([$content, $_SESSION['user_id'], $id]);
+
+echo json_encode(['success' => true]);
+?>

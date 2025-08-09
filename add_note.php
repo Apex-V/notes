@@ -33,7 +33,7 @@ if ($content === '') {
     exit;
 }
 
-$stmt = $pdo->prepare('INSERT INTO notes (content, created_by, status, created_at) VALUES (?, ?, "Pending", NOW())');
-$stmt->execute([$content, $_SESSION['user_id']]);
+$stmt = $pdo->prepare('INSERT INTO notes (user_id, content, status, created_at) VALUES (?, ?, "Pending", NOW())');
+$stmt->execute([$_SESSION['user_id'], $content]);
 
 echo json_encode(['success' => true, 'id' => (int)$pdo->lastInsertId()]);

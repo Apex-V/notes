@@ -133,7 +133,8 @@ async function addNote() {
 // Mostrar todas las notas
 async function renderNotes() {
     const res = await fetch('fetch_notes.php', { credentials: 'include' });
-    const notes = await res.json();
+    const data = await res.json();
+    const notes = data.notes || [];
     notesList.innerHTML = '';
 
     notes.forEach(note => {
@@ -157,6 +158,13 @@ async function renderNotes() {
               </select>`
             : '';
 
+        const adminButtons = currentRole === 1
+            ? `<div class="note-actions">
+                <button data-edit="${note.id}">✏️</button>
+                <button data-delete="${note.id}">🗑️</button>
+              </div>`
+            : '';
+
         // Genera el HTML
         noteDiv.innerHTML = `
       <div class="note-meta">👤 ${escapeHtml(note.username)} | 🕒 ${note.created_at}</div>
@@ -164,21 +172,33 @@ async function renderNotes() {
       <div class="note-meta">Estado: <strong>${note.status}</strong></div>
       ${statusSelect}
       ${updatedInfo}
+      ${adminButtons}
     `;
 
         if (currentRole === 1) {
             const selectEl = noteDiv.querySelector('select');
-            selectEl.addEventListener('change', async (e) => {
-                const newStatus = e.target.value;
-                await changeStatus(note.id, newStatus);
+            if (selectEl) {
+                selectEl.addEventListener('change', async (e) => {
+                    const newStatus = e.target.value;
+                    await changeStatus(note.id, newStatus);
 
-                noteDiv.classList.remove('pending', 'completed');
-                const newClass = newStatus.toLowerCase() === 'completed' ? 'completed' : 'pending';
-                noteDiv.classList.add(newClass);
+                    noteDiv.classList.remove('pending', 'completed');
+                    const newClass = newStatus.toLowerCase() === 'completed' ? 'completed' : 'pending';
+                    noteDiv.classList.add(newClass);
 
-                const metaEstado = noteDiv.querySelector('.note-meta:nth-of-type(2)');
-                if (metaEstado) metaEstado.innerHTML = `Estado: <strong>${newStatus}</strong>`;
-            });
+                    const metaEstado = noteDiv.querySelector('.note-meta:nth-of-type(2)');
+                    if (metaEstado) metaEstado.innerHTML = `Estado: <strong>${newStatus}</strong>`;
+                });
+            }
+
+            const editBtn = noteDiv.querySelector('[data-edit]');
+            const delBtn = noteDiv.querySelector('[data-delete]');
+            if (editBtn) {
+                editBtn.addEventListener('click', () => editNote(note.id, note.content));
+            }
+            if (delBtn) {
+                delBtn.addEventListener('click', () => deleteNote(note.id));
+            }
         }
 
         notesList.appendChild(noteDiv);
@@ -190,6 +210,34 @@ async function changeStatus(id, status) {
     fd.append('id', id);
     fd.append('status', status);
     const res = await fetch('update_status.php', { method: 'POST', body: fd, credentials: 'include' });
+    const data = await res.json();
+    if (data.success) {
+        renderNotes();
+    } else {
+        alert('⚠️ ' + data.message);
+    }
+}
+
+async function editNote(id, currentContent) {
+    const newContent = prompt('Editar nota:', currentContent);
+    if (newContent === null) return;
+    const fd = new FormData();
+    fd.append('id', id);
+    fd.append('content', newContent.trim());
+    const res = await fetch('edit_note.php', { method: 'POST', body: fd, credentials: 'include' });
+    const data = await res.json();
+    if (data.success) {
+        renderNotes();
+    } else {
+        alert('⚠️ ' + data.message);
+    }
+}
+
+async function deleteNote(id) {
+    if (!confirm('¿Eliminar nota?')) return;
+    const fd = new FormData();
+    fd.append('id', id);
+    const res = await fetch('delete_note.php', { method: 'POST', body: fd, credentials: 'include' });
     const data = await res.json();
     if (data.success) {
         renderNotes();
