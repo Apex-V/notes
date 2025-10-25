@@ -73,6 +73,18 @@ button:hover {
     word-wrap: break-word;
 }
 
+.note.pending {
+    background-color: #fff9c4;
+}
+
+.note.completed {
+    background-color: #dcedc8;
+}
+
+.note select {
+    margin-top: 8px;
+}
+
 .note-meta {
     font-size: 13px;
     color: #555;
